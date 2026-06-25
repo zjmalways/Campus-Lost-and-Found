@@ -5,7 +5,18 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/compus-lost-find-parent/pom.xml" />
+        <option value="$PROJECT_DIR$/compus-lost-find-util/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/compus-lost-find-controller/pom.xml" />
+        <option value="$PROJECT_DIR$/compus-lost-find-mapper/pom.xml" />
+        <option value="$PROJECT_DIR$/compus-lost-find-parent/compus-lost-find-util/pom.xml" />
+        <option value="$PROJECT_DIR$/compus-lost-find-parent/pom.xml" />
+        <option value="$PROJECT_DIR$/compus-lost-find-service/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">

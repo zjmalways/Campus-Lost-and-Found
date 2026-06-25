@@ -3,21 +3,31 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Annotation profile for compus-lost-find" enabled="true">
+      <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$PROJECT_DIR$/../../../Maven/apache-maven-3.9.12/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-          <entry name="$PROJECT_DIR$/../../../Maven/apache-maven-3.9.12/repository/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
-        </processorPath>
-        <module name="compus-lost-find" />
+        <module name="compus-lost-find-util" />
+        <module name="compus-lost-find-pojo" />
+        <module name="compus-lost-find-main" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="compus-lost-find-controller" target="17" />
+      <module name="compus-lost-find-mapper" target="17" />
+      <module name="compus-lost-find-parent" target="17" />
+      <module name="compus-lost-find-service" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="compus-lost-find" options="-parameters" />
+      <module name="compus-lost-find" options="" />
+      <module name="compus-lost-find-controller" options="-parameters" />
+      <module name="compus-lost-find-main" options="-parameters" />
+      <module name="compus-lost-find-mapper" options="-parameters" />
+      <module name="compus-lost-find-pojo" options="-parameters" />
+      <module name="compus-lost-find-service" options="-parameters" />
+      <module name="compus-lost-find-util" options="-parameters" />
     </option>
   </component>
 </project>
