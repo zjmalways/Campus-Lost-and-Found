@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zhangjiamin.mapper.AnnouncementMapper">
+
+    <resultMap id="BaseResultMap" type="org.zhangjiamin.entity.Announcement">
+        <id column="announcement_id" property="announcementId"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="publisher_id" property="publisherId"/>
+        <result column="publisher_name" property="publisherName"/>
+        <result column="is_top" property="isTop"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        announcement_id, title, content, publisher_id, publisher_name,
+        is_top, create_time, update_time
+    </sql>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM announcements WHERE announcement_id = #{announcementId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="announcementId">
+        INSERT INTO announcements (title, content, publisher_id, publisher_name, is_top)
+        VALUES (#{title}, #{content}, #{publisherId}, #{publisherName}, #{isTop})
+    </insert>
+
+    <update id="update">
+        UPDATE announcements
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="isTop != null">is_top = #{isTop},</if>
+        </set>
+        WHERE announcement_id = #{announcementId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM announcements WHERE announcement_id = #{announcementId}
+    </delete>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM announcements
+        <where>
+            <if test="isTop != null">
+                AND is_top = #{isTop}
+            </if>
+        </where>
+        ORDER BY is_top DESC, create_time DESC
+    </select>
+
+    <select id="findTopAnnouncements" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM announcements WHERE is_top = 1
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

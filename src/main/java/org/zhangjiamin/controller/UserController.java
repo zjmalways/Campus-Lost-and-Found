@@ -1,6 +1,5 @@
 package org.zhangjiamin.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.zhangjiamin.common.Result;
@@ -8,24 +7,17 @@ import org.zhangjiamin.dto.LoginRequest;
 import org.zhangjiamin.dto.RegisterRequest;
 import org.zhangjiamin.entity.User;
 import org.zhangjiamin.service.UserService;
-import org.zhangjiamin.util.AliyunOSSUtil;
 import org.zhangjiamin.util.ThreadLocalUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.web.multipart.MultipartFile;
-
-@Slf4j
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private AliyunOSSUtil aliyunOSSUtil;
 
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
@@ -39,7 +31,6 @@ public class UserController {
 
     @PostMapping("/register")
     public Result<User> register(@RequestBody RegisterRequest registerRequest) {
-        log.info("用户注册：{}", registerRequest);
         try {
             User user = userService.register(registerRequest);
             user.setPassword(null);
@@ -89,39 +80,6 @@ public class UserController {
             String newPassword = params.get("newPassword");
             userService.updatePassword(userId, oldPassword, newPassword);
             return Result.success();
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
-        }
-    }
-
-    /**
-     * 上传头像
-     */
-    @PostMapping("/avatar")
-    public Result<String> uploadAvatar(@RequestParam("file") MultipartFile file) {
-        try {
-            Long userId = ThreadLocalUtil.getCurrentUserId();
-            if (userId == null) {
-                return Result.unauthorized("未登录");
-            }
-
-            // 校验文件类型
-            String contentType = file.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                return Result.error("只能上传图片文件");
-            }
-
-            // 上传到 OSS
-            String avatarUrl = aliyunOSSUtil.uploadAvatar(file);
-            log.info("头像上传成功 —— userId: {}, url: {}", userId, avatarUrl);
-
-            // 更新用户头像地址到数据库
-            User user = new User();
-            user.setUserId(userId);
-            user.setAvatar(avatarUrl);
-            userService.updateUserInfo(user);
-
-            return Result.success(avatarUrl);
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
         }
