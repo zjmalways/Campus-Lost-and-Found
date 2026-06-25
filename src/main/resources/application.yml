@@ -1,0 +1,30 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/campus_lost_found
+    username: root
+    password: zjmgzh2@
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: org.zhangjiamin.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+
+jwt:
+  secret: campus-lost-found-secret-key-2024-zhangjiaming-springboot
+  expiration: 86400000
+# 配置事务管理日志级别
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug
