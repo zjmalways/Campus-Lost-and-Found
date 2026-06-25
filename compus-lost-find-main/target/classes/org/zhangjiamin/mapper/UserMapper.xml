@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zhangjiamin.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="org.zhangjiamin.entity.User">
+        <id column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="nickname" property="nickname"/>
+        <result column="contact" property="contact"/>
+        <result column="avatar" property="avatar"/>
+        <result column="role" property="role"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        user_id, username, password, nickname, contact, avatar,
+        role, create_time, update_time, status
+    </sql>
+
+    <select id="findByUsername" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM users WHERE username = #{username}
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM users WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO users (username, password, nickname, contact, avatar, role, status)
+        VALUES (#{username}, #{password}, #{nickname}, #{contact}, #{avatar}, #{role}, #{status})
+    </insert>
+
+    <update id="update">
+        UPDATE users
+        <set>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="contact != null">contact = #{contact},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE user_id = #{userId}
+    </update>
+
+    <update id="updatePassword">
+        UPDATE users SET password = #{password} WHERE user_id = #{userId}
+    </update>
+
+</mapper>
