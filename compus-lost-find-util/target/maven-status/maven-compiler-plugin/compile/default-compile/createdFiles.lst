@@ -1,0 +1,5 @@
+org\zhangjiamin\util\JwtUtil.class
+org\zhangjiamin\util\ThreadLocalUtil.class
+org\zhangjiamin\util\AliyunOSSUtil.class
+org\zhangjiamin\util\PasswordUtil.class
+org\zhangjiamin\util\Demo.class

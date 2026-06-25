@@ -1,0 +1,8 @@
+org\zhangjiamin\dto\LoginRequest.class
+org\zhangjiamin\common\Result.class
+org\zhangjiamin\dto\RegisterRequest.class
+org\zhangjiamin\entity\User.class
+org\zhangjiamin\entity\Comment.class
+org\zhangjiamin\dto\ItemPageRequest.class
+org\zhangjiamin\entity\Item.class
+org\zhangjiamin\entity\Announcement.class

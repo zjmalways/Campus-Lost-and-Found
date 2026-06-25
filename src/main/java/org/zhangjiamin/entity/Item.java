@@ -12,7 +12,6 @@ public class Item {
     private String description;
     private String features;
     private String images;
-    private String imageList;   // JSON数组格式的图片URL列表
     private String location;
     private LocalDateTime eventTime;
     private Long publisherId;

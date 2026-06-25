@@ -7,31 +7,17 @@ import org.zhangjiamin.common.Result;
 import org.zhangjiamin.dto.ItemPageRequest;
 import org.zhangjiamin.entity.Item;
 import org.zhangjiamin.service.ItemService;
-import org.zhangjiamin.util.AliyunOSSUtil;
 import org.zhangjiamin.util.ThreadLocalUtil;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @RestController
 @RequestMapping("/api/items")
 public class ItemController {
 
     @Autowired
     private ItemService itemService;
-
-    @Autowired
-    private AliyunOSSUtil aliyunOSSUtil;
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
      * 分页查询物品列表（公开接口）
@@ -126,109 +112,6 @@ public class ItemController {
             Long itemId = Long.valueOf(params.get("itemId").toString());
             Integer status = Integer.valueOf(params.get("status").toString());
             itemService.updateStatus(itemId, status, userId, role);
-            return Result.success();
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
-        }
-    }
-
-    /**
-     * 上传单张物品图片
-     */
-    @PostMapping("/upload/image")
-    public Result<String> uploadItemImage(@RequestParam("file") MultipartFile file) {
-        try {
-            Long userId = ThreadLocalUtil.getCurrentUserId();
-            if (userId == null) {
-                return Result.unauthorized("未登录");
-            }
-
-            String contentType = file.getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                return Result.error("只能上传图片文件");
-            }
-
-            String url = aliyunOSSUtil.uploadItemImage(file);
-            log.info("物品图片上传成功 —— userId: {}, url: {}", userId, url);
-            return Result.success(url);
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
-        }
-    }
-
-    /**
-     * 批量上传物品图片
-     */
-    @PostMapping("/upload/images")
-    public Result<List<String>> uploadItemImages(@RequestParam("files") MultipartFile[] files) {
-        try {
-            Long userId = ThreadLocalUtil.getCurrentUserId();
-            if (userId == null) {
-                return Result.unauthorized("未登录");
-            }
-
-            List<String> urls = aliyunOSSUtil.uploadItemImages(files);
-            log.info("物品图片批量上传成功 —— userId: {}, 数量: {}", userId, urls.size());
-            return Result.success(urls);
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
-        }
-    }
-
-    /**
-     * 更新物品图片列表（替换全部图片）
-     */
-    @PutMapping("/images/{itemId}")
-    public Result<?> updateItemImages(@PathVariable Long itemId, @RequestBody Map<String, Object> params) {
-        try {
-            Long userId = ThreadLocalUtil.getCurrentUserId();
-            Integer role = ThreadLocalUtil.getCurrentRole();
-            if (userId == null) {
-                return Result.unauthorized("未登录");
-            }
-
-            @SuppressWarnings("unchecked")
-            List<String> imageUrls = (List<String>) params.get("imageUrls");
-
-            Item item = new Item();
-            item.setItemId(itemId);
-
-            if (imageUrls != null && !imageUrls.isEmpty()) {
-                item.setImages(String.join(",", imageUrls));
-                try {
-                    item.setImageList(OBJECT_MAPPER.writeValueAsString(imageUrls));
-                } catch (JsonProcessingException e) {
-                    log.error("JSON序列化图片列表失败", e);
-                }
-            } else {
-                item.setImages("");
-                item.setImageList("[]");
-            }
-
-            itemService.updateItem(item);
-            return Result.success();
-        } catch (RuntimeException e) {
-            return Result.error(e.getMessage());
-        }
-    }
-
-    /**
-     * 删除物品图片（从OSS移除）
-     */
-    @DeleteMapping("/upload/image")
-    public Result<?> deleteItemImage(@RequestBody Map<String, String> params) {
-        try {
-            Long userId = ThreadLocalUtil.getCurrentUserId();
-            if (userId == null) {
-                return Result.unauthorized("未登录");
-            }
-
-            String imageUrl = params.get("imageUrl");
-            if (imageUrl == null || imageUrl.isEmpty()) {
-                return Result.error("请提供要删除的图片URL");
-            }
-
-            aliyunOSSUtil.deleteFile(imageUrl);
             return Result.success();
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
