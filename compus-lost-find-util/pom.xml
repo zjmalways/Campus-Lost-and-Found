@@ -19,6 +19,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.zhangjiaming</groupId>
+            <artifactId>compus-lost-find-pojo</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
         </dependency>
