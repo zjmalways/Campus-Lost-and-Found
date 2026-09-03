@@ -24,6 +24,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
             "/user/login",
             "/user/register",
             "/logout",
+            "/chat",
             "/items/list",
             "/items/detail/**",
             "/items/types",

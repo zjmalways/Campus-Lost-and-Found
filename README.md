@@ -18,6 +18,10 @@
 | Lombok / Validation | - | 简化代码 / 参数校验 |
 | AOP | - | 公共字段自动填充 |
 | JUC | - | 登录高并发限流 |
+| Spring AI | 1.0.0 | 大模型集成（RAG 智能客服） |
+| DeepSeek | deepseek-chat | 对话大模型 |
+| Ollama | bge-m3 | 本地嵌入模型 |
+| PostgreSQL + pgvector | 15+ | 向量库 |
 
 ---
 
@@ -64,6 +68,9 @@ compus-lost-find/
 | JDK | 17+ |
 | MySQL | 8.0+ |
 | Maven | 3.6+ |
+| PostgreSQL | 15+（含 pgvector 扩展） |
+| Ollama | 本地安装（嵌入模型 bge-m3） |
+| DeepSeek API Key | - |
 
 ### 1. 初始化数据库
 
@@ -105,6 +112,21 @@ mvn spring-boot:run
 
 - Swagger UI：`http://localhost:8081/swagger-ui/index.html`
 - OpenAPI JSON：`http://localhost:8081/v3/api-docs`
+
+### 5. 智能客服环境准备（RAG）
+
+智能客服功能需要以下外部依赖：
+
+1. **DeepSeek API Key**：在 [DeepSeek 开放平台](https://platform.deepseek.com) 申请，配置到 `spring.ai.deepseek.api-key`（或环境变量 `DEEPSEEK_API_KEY`）。
+2. **Ollama**：本地安装并启动，拉取嵌入模型 `ollama pull bge-m3`（默认地址 `http://localhost:11434`）。
+3. **PostgreSQL + pgvector**：创建数据库并启用扩展：
+   ```sql
+   CREATE DATABASE rag_db;
+   \c rag_db;
+   CREATE EXTENSION IF NOT EXISTS vector;
+   ```
+   连接信息配置在 `spring.ai.vectorstore.pgvector.*`。
+4. 应用启动时，`KnowledgeBaseLoader` 会自动把平台 FAQ 知识库向量化写入 pgvector。
 
 ---
 
@@ -247,6 +269,22 @@ Base URL：`http://localhost:8081`（**无 `/api` 前缀**，`/api` 由前端代
 | POST | `/announcements/create` | 发布公告（管理员） | ✅ |
 | PUT | `/announcements/update` | 编辑公告（管理员） | ✅ |
 | DELETE | `/announcements/delete/{id}` | 删除公告（管理员） | ✅ |
+
+### 智能客服模块 `/chat`
+
+| 方法 | 路径 | 说明 | 需登录 |
+|------|------|------|:---:|
+| POST | `/chat` | 智能问答（RAG 知识库检索增强） | ❌ |
+
+请求：
+```json
+{ "question": "如何发布物品？" }
+```
+
+响应（`data` 为 AI 回答文本）：
+```json
+{ "code": 200, "message": "success", "data": "发布物品前请先登录平台……" }
+```
 
 ---
 

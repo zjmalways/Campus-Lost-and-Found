@@ -11,6 +11,32 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 10MB
+  ai:
+    deepseek:
+      api-key: ${DEEPSEEK_API_KEY:sk-xxx}
+      base-url: https://api.deepseek.com
+      chat:
+        options:
+          model: deepseek-chat
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        enabled: false
+      embedding:
+        options:
+          model: bge-m3
+    vectorstore:
+      pgvector:
+        host: localhost
+        port: 5432
+        database: rag_db
+        username: postgres
+        password: postgres
+        table-name: vector_store
+        dimensions: 1024
+        index-type: hnsw
+        distance-type: cosine_distance
+        initialize-schema: true
 
 mybatis-plus:
   configuration:

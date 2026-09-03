@@ -50,4 +50,7 @@ public final class ErrorContext {
     public static final String NOT_ADMIN_CREATE = "仅管理员可发布公告";
     public static final String NOT_ADMIN_UPDATE = "仅管理员可修改公告";
     public static final String NOT_ADMIN_DELETE = "仅管理员可删除公告";
+
+    // ===== 智能客服 =====
+    public static final String CHAT_ERROR = "客服服务暂时不可用，请稍后再试";
 }

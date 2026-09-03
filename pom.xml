@@ -27,6 +27,7 @@
         <java.version>17</java.version>
         <mybatis-plus-version>3.5.7</mybatis-plus-version>
         <jwt-version>0.12.6</jwt-version>
+        <spring-ai.version>1.0.0</spring-ai.version>
     </properties>
 
     <dependencies>
@@ -111,6 +112,14 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Spring AI（统一管理各 AI 模块版本） -->
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- JWT -->
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
