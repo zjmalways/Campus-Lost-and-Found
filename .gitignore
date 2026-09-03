@@ -1,2 +1,7 @@
 # 项目排除路径
-/target/
+**/target/
+.idea
+*.iml
+*.class
+*Test.java
+**/test/
