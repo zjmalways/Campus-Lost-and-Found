@@ -58,19 +58,23 @@ public class JwtInterceptor implements HandlerInterceptor {
         }
 
         // 解析 Token，将用户信息写入 ThreadLocal
+        // 解析 Token，同时存入ThreadLocal 和 request attribute
         Claims claims = jwtUtil.parseToken(token);
-//        ThreadLocalUtil.set("userId", Long.parseLong(claims.getSubject()));
-//        ThreadLocalUtil.set("username", claims.get("username", String.class));
-//        ThreadLocalUtil.set("role", claims.get("role", Integer.class));
-        // ✅ 改成存入request属性
         Long userId = Long.parseLong(claims.getSubject());
         String username = claims.get("username", String.class);
         Integer role = claims.get("role", Integer.class);
 
+// 普通MVC接口继续用ThreadLocal
+        ThreadLocalUtil.set("userId", userId);
+        ThreadLocalUtil.set("username", username);
+        ThreadLocalUtil.set("role", role);
+
+// SSE流式接口使用request属性
         request.setAttribute("userId", userId);
         request.setAttribute("username", username);
         request.setAttribute("role", role);
 
+        log.info("token校验成功，userId={}", userId);
         return true;
     }
 
@@ -120,6 +124,6 @@ public class JwtInterceptor implements HandlerInterceptor {
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         // 请求完成后清除 ThreadLocal，避免内存泄漏
-        //ThreadLocalUtil.remove();
+        ThreadLocalUtil.remove();
     }
 }

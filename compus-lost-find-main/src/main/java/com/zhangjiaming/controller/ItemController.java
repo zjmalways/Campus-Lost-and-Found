@@ -55,6 +55,7 @@ public class ItemController {
     @Operation(summary = "发布物品", description = "发布一条丢失/捡到物品信息（需登录）")
     @PostMapping("/create")
     public Result<Item> create(@RequestBody Item item) {
+        log.info("发布物品");
         Long userId = ThreadLocalUtil.getCurrentUserId();
         String username = ThreadLocalUtil.getCurrentUsername();
         if (userId == null) {
