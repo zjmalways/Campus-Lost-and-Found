@@ -2,6 +2,10 @@ server:
   port: 8081
 
 spring:
+  autoconfigure:
+    exclude:
+      org.springframework.ai.vectorstore.pgvector.autoconfigure.PgVectorStoreAutoConfiguration
+      org.springframework.ai.model.deepseek.autoconfigure.DeepSeekChatAutoConfiguration
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/campus_lost_found?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
@@ -12,31 +16,33 @@ spring:
       max-file-size: 5MB
       max-request-size: 10MB
   ai:
-    deepseek:
-      api-key: ${DEEPSEEK_API_KEY:sk-xxx}
-      base-url: https://api.deepseek.com
-      chat:
-        options:
-          model: deepseek-chat
+#    deepseek:
+#      api-key: ${DEEPSEEK_API_KEY:sk-xxx}
+#      base-url: https://api.deepseek.com
+#      chat:
+#        options:
+#          model: deepseek-chat
     ollama:
       base-url: http://localhost:11434
       chat:
-        enabled: false
+        enabled: true
+        options:
+          model: qwen3.5:9b-q4_K_M # 对话模型
       embedding:
         options:
-          model: bge-m3
-    vectorstore:
-      pgvector:
-        host: localhost
-        port: 5432
-        database: rag_db
-        username: postgres
-        password: postgres
-        table-name: vector_store
-        dimensions: 1024
-        index-type: hnsw
-        distance-type: cosine_distance
-        initialize-schema: true
+          model: qwen3.5:9b-q4_K_M # 向量嵌入模型
+#    vectorstore:
+#      pgvector:
+#        host: localhost
+#        port: 5432
+#        database: rag_db
+#        username: postgres
+#        password: postgres
+#        table-name: vector_store
+#        dimensions: 1024
+#        index-type: hnsw
+#        distance-type: cosine_distance
+#        initialize-schema: true
 
 mybatis-plus:
   configuration:

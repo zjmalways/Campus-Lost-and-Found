@@ -9,6 +9,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 /**
  * JWT 校验拦截器：从 Cookie（token）或 Authorization 头读取 Token，校验通过后将用户信息写入 ThreadLocal。
  */
+@Slf4j
 @Component
 public class JwtInterceptor implements HandlerInterceptor {
 
@@ -27,6 +29,18 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // 1. 打印所有cookie
+        Cookie[] cookies = request.getCookies();
+        log.info("====进入JWT拦截器====");
+        if(cookies == null){
+            log.info("Cookie数组为null！");
+        }else{
+            for (Cookie cookie : cookies) {
+                log.info("cookie name={}, value={}", cookie.getName(), cookie.getValue());
+            }
+        }
+
+
         // 放行 OPTIONS 预检请求
         if ("OPTIONS".equals(request.getMethod())) {
             return true;
@@ -34,17 +48,28 @@ public class JwtInterceptor implements HandlerInterceptor {
 
         String token = resolveToken(request);
         if (token == null || token.isEmpty()) {
-            return reject(response, ErrorContext.NOT_LOGIN);
+            log.info("token为空，返回401 NOT_LOGIN");
+//            return reject(response, ErrorContext.NOT_LOGIN);
+            return reject(request,response, ErrorContext.NOT_LOGIN);
         }
         if (!jwtUtil.validateToken(token)) {
-            return reject(response, ErrorContext.TOKEN_INVALID);
+//            return reject(response, ErrorContext.TOKEN_INVALID);
+            return reject(request,response, ErrorContext.TOKEN_INVALID);
         }
 
         // 解析 Token，将用户信息写入 ThreadLocal
         Claims claims = jwtUtil.parseToken(token);
-        ThreadLocalUtil.set("userId", Long.parseLong(claims.getSubject()));
-        ThreadLocalUtil.set("username", claims.get("username", String.class));
-        ThreadLocalUtil.set("role", claims.get("role", Integer.class));
+//        ThreadLocalUtil.set("userId", Long.parseLong(claims.getSubject()));
+//        ThreadLocalUtil.set("username", claims.get("username", String.class));
+//        ThreadLocalUtil.set("role", claims.get("role", Integer.class));
+        // ✅ 改成存入request属性
+        Long userId = Long.parseLong(claims.getSubject());
+        String username = claims.get("username", String.class);
+        Integer role = claims.get("role", Integer.class);
+
+        request.setAttribute("userId", userId);
+        request.setAttribute("username", username);
+        request.setAttribute("role", role);
 
         return true;
     }
@@ -68,16 +93,33 @@ public class JwtInterceptor implements HandlerInterceptor {
         return null;
     }
 
-    private boolean reject(HttpServletResponse response, String message) throws Exception {
+//    private boolean reject(HttpServletResponse response, String message) throws Exception {
+//        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//        response.setContentType("application/json;charset=utf-8");
+//        response.getWriter().write(OBJECT_MAPPER.writeValueAsString(Result.unauthorized(message)));
+//        return false;
+//    }
+
+    private boolean reject(HttpServletRequest request, HttpServletResponse response, String message) throws Exception {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+        // 判断当前请求是不是SSE流式接口
+        String accept = request.getHeader("Accept");
+        if (accept != null && accept.contains("text/event-stream")) {
+            // SSE场景：只设置401状态码，不写任何body
+            return false;
+        }
+
+        // 普通接口：正常返回JSON
         response.setContentType("application/json;charset=utf-8");
         response.getWriter().write(OBJECT_MAPPER.writeValueAsString(Result.unauthorized(message)));
         return false;
     }
 
+
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         // 请求完成后清除 ThreadLocal，避免内存泄漏
-        ThreadLocalUtil.remove();
+        //ThreadLocalUtil.remove();
     }
 }

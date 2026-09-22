@@ -10,6 +10,7 @@ import com.zhangjiaming.util.AliyunOSSUtil;
 import com.zhangjiaming.util.ThreadLocalUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +36,18 @@ public class UserController {
      */
     @Operation(summary = "用户登录", description = "使用用户名密码登录，成功后返回 JWT token（前端保存到 Cookie）")
     @PostMapping("/login")
-    public Result<Map<String, Object>> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return Result.success(userService.login(loginRequest));
+    public Result<Map<String, Object>> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+        Map<String, Object> resultMap = userService.login(loginRequest);
+        String token = (String) resultMap.get("token");
+
+        // 手动构造 Set-Cookie 头，支持 SameSite=Lax
+        String cookieValue = String.format("token=%s; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax", token);
+        response.setHeader("Set-Cookie", cookieValue);
+
+        return Result.success(resultMap);
     }
+
+
 
     /**
      * 注册
