@@ -10,6 +10,7 @@ import com.zhangjiaming.util.AliyunOSSUtil;
 import com.zhangjiaming.util.ThreadLocalUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class ItemController {
      */
     @Operation(summary = "分页查询物品列表", description = "支持按发布类型/物品类型/状态/发布者筛选及关键词搜索（公开）")
     @GetMapping("/list")
-    public Result<Page<Item>> list(ItemPageRequest request) {
+    public Result<Page<Item>> list(@Valid ItemPageRequest request) {
         return Result.success(itemService.findPage(request));
     }
 
