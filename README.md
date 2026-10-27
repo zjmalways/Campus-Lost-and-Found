@@ -18,10 +18,9 @@
 | Lombok / Validation | - | 简化代码 / 参数校验 |
 | AOP | - | 公共字段自动填充 |
 | JUC | - | 登录高并发限流 |
-| Spring AI | 1.0.0 | 大模型集成（RAG 智能客服） |
-| DeepSeek | deepseek-chat | 对话大模型 |
-| Ollama | bge-m3 | 本地嵌入模型 |
-| PostgreSQL + pgvector | 15+ | 向量库 |
+| Spring AI | 1.0.0 | 大模型集成 |
+| DeepSeek | deepseek-chat | 通过 OpenAI 兼容接口提供对话能力 |
+| Ollama | - | 已保留本地模型配置，当前客服接口使用 DeepSeek |
 
 ---
 
@@ -68,9 +67,7 @@ compus-lost-find/
 | JDK | 17+ |
 | MySQL | 8.0+ |
 | Maven | 3.6+ |
-| PostgreSQL | 15+（含 pgvector 扩展） |
-| Ollama | 本地安装（嵌入模型 bge-m3） |
-| DeepSeek API Key | - |
+| DeepSeek API Key | 用于智能客服 |
 
 ### 1. 初始化数据库
 
@@ -78,29 +75,26 @@ compus-lost-find/
 mysql -u root -p < compus-lost-find-main/src/sql/init_mysql.sql
 ```
 
-脚本会创建数据库 `campus_lost_found` 及 4 张表（users / items / comments / announcements），并初始化默认管理员。
+脚本会创建数据库 `campus_lost_found` 及平台业务表（users / items / comments / announcements / chat_sessions / chat_messages），并初始化默认管理员。
 
 > 默认管理员：用户名 `admin`，密码 `admin123`（已按 SHA-256+盐 存储）。
 
 ### 2. 配置
 
-编辑 `compus-lost-find-main/src/main/resources/application.yml`：
+通过环境变量配置数据库密码和 DeepSeek API Key。不要将密钥写入或提交到代码库。以下变量需在启动应用的同一终端中设置。
 
-```yaml
-spring:
-  datasource:
-    username: root
-    password: 你的MySQL密码
+PowerShell 示例（在启动应用的同一终端中执行）：
 
-aliyun:
-  oss:
-    access-key-id:     你的阿里云 AccessKey ID   # 或设置环境变量 ALIBABA_CLOUD_ACCESS_KEY_ID
-    access-key-secret: 你的阿里云 AccessKey Secret
+```powershell
+$env:DB_PASSWORD = "你的MySQL密码"
+$env:DEEPSEEK_API_KEY = "你的DeepSeek API Key"
 ```
+
+如需使用阿里云 OSS，再按 `application.yml` 中的说明设置对应 AccessKey。
 
 ### 3. 启动
 
-```bash
+```powershell
 mvn clean compile
 mvn spring-boot:run
 # 服务运行在 http://localhost:8081
@@ -112,21 +106,15 @@ mvn spring-boot:run
 
 - Swagger UI：`http://localhost:8081/swagger-ui/index.html`
 - OpenAPI JSON：`http://localhost:8081/v3/api-docs`
+- 前端联调接口字段文档：[接口文档.md](./接口文档.md)
 
-### 5. 智能客服环境准备（RAG）
+### 5. 智能客服
 
-智能客服功能需要以下外部依赖：
+当前智能客服通过 Spring AI 的 OpenAI 兼容客户端调用 DeepSeek，并使用 Function Calling 查询物品和公告，或按用户请求执行受权限控制的物品/公告操作；当前不包含知识库检索（RAG）流程。启动前需要设置 `DEEPSEEK_API_KEY`；数据库密码通过 `DB_PASSWORD` 设置。Spring Boot 不会自动加载项目中的 `.env` 文件。
 
-1. **DeepSeek API Key**：在 [DeepSeek 开放平台](https://platform.deepseek.com) 申请，配置到 `spring.ai.deepseek.api-key`（或环境变量 `DEEPSEEK_API_KEY`）。
-2. **Ollama**：本地安装并启动，拉取嵌入模型 `ollama pull bge-m3`（默认地址 `http://localhost:11434`）。
-3. **PostgreSQL + pgvector**：创建数据库并启用扩展：
-   ```sql
-   CREATE DATABASE rag_db;
-   \c rag_db;
-   CREATE EXTENSION IF NOT EXISTS vector;
-   ```
-   连接信息配置在 `spring.ai.vectorstore.pgvector.*`。
-4. 应用启动时，`KnowledgeBaseLoader` 会自动把平台 FAQ 知识库向量化写入 pgvector。
+客服输入会经过 `com.zhangjiaming.safety` 下的校验：限制空问题、超长内容、控制字符和明显提示覆盖/系统提示词提取模式。该规则是启发式检查，不代表能完全识别提示注入。
+
+客服接口使用流式响应，详见下方「智能客服模块」。
 
 ---
 
@@ -274,17 +262,29 @@ Base URL：`http://localhost:8081`（**无 `/api` 前缀**，`/api` 由前端代
 
 | 方法 | 路径 | 说明 | 需登录 |
 |------|------|------|:---:|
-| POST | `/chat` | 智能问答（RAG 知识库检索增强） | ❌ |
+| POST | `/chat/stream` | 智能问答（DeepSeek 流式响应） | ✅ |
 
-请求：
-```json
-{ "question": "如何发布物品？" }
+请求头需包含 `Accept: text/event-stream`，并通过登录后获取的 JWT 进行鉴权（Cookie `token` 或 Authorization 请求头）。请求体为纯文本问题，而不是 JSON 对象：
+
+```http
+POST /chat/stream
+Content-Type: text/plain
+Accept: text/event-stream
+
+如何发布物品？
 ```
 
-响应（`data` 为 AI 回答文本）：
-```json
-{ "code": 200, "message": "success", "data": "发布物品前请先登录平台……" }
+响应为 `text/event-stream`，回答以 SSE 事件逐段返回。可以先创建会话并取回 `sessionId`，随后在请求头中传入：
+
+```http
+X-Chat-Session-Id: 123
 ```
+
+客服支持按登录用户保存会话和消息历史，并将最近20条已完成消息作为对话上下文。接口：`POST /chat/sessions` 创建会话，`GET /chat/sessions` 查询最近50个会话，`GET /chat/sessions/{sessionId}/messages` 查询最近100条消息（按时间正序返回）。聊天请求可通过 `X-Chat-Session-Id` 继续指定会话；未提供时会自动创建，并在响应头返回该 ID。历史接口只允许会话所有者访问。
+
+客服可查询物品列表/详情及公告列表/详情。登录用户可通过客服发布物品；编辑、删除和更新物品状态仍受“发布者或管理员”权限限制。公告的发布、编辑和删除仅管理员可执行。删除操作前，客服应先确认目标记录并取得用户明确确认。应用包日志级别设为 DEBUG；日志仅记录用户/会话 ID、耗时、状态和响应长度，不记录完整问题、回答或凭据。
+
+新建数据库时执行 `compus-lost-find-main/src/sql/init_mysql.sql`；已有数据库升级时，在项目根目录执行 `mysql -u root -p < compus-lost-find-main/src/sql/upgrade_chat_history.sql`，创建会话和消息表。
 
 ---
 

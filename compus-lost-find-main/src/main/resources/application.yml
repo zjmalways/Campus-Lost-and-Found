@@ -48,7 +48,7 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
 
 jwt:
   secret: campus-lost-found-secret-key-2024-zhangjiaming-springboot
@@ -69,4 +69,5 @@ aliyun:
 # 事务管理日志
 logging:
   level:
+    com.zhangjiaming: debug
     org.springframework.jdbc.support.JdbcTransactionManager: debug

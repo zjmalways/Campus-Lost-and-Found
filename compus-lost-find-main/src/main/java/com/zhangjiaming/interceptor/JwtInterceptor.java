@@ -36,7 +36,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             log.info("Cookie数组为null！");
         }else{
             for (Cookie cookie : cookies) {
-                log.info("cookie name={}, value={}", cookie.getName(), cookie.getValue());
+                log.info("cookie name={}", cookie.getName());
             }
         }
 

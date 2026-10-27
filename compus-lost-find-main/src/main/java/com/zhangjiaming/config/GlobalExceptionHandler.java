@@ -2,6 +2,7 @@ package com.zhangjiaming.config;
 
 import com.zhangjiaming.common.Result;
 import com.zhangjiaming.context.ErrorContext;
+import com.zhangjiaming.safety.AiPromptRejectedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -29,6 +30,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public Result<?> handleNotReadable(HttpMessageNotReadableException e) {
         return Result.badRequest(ErrorContext.BAD_REQUEST_BODY);
+    }
+
+    @ExceptionHandler(AiPromptRejectedException.class)
+    public Result<?> handleRejectedAiPrompt(AiPromptRejectedException e) {
+        return Result.badRequest(e.getMessage());
     }
 
     /** 业务异常（Service 层抛出的 RuntimeException，携带友好提示） */

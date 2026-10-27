@@ -24,7 +24,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
             "/user/login",
             "/user/register",
             "/logout",
-            "/chat",
             "/items/list",
             "/items/detail/**",
             "/items/types",
@@ -50,6 +49,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
+                .exposedHeaders("X-Chat-Session-Id")
                 .allowCredentials(true)
                 .maxAge(3600);
     }
