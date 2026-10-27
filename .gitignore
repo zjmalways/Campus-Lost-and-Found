@@ -1,7 +1,65 @@
-# 项目排除路径
-**/target/
-.idea
-*.iml
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle（如果用的是 Gradle 就保留这些）
+.gradle/
+build/
+buildSrc/
+
+# 编译产物
 *.class
-*Test.java
-**/test/
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+.flattened-pom.xml
+
+# Eclipse / STS
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
+# VS Code
+.vscode/
+
+# 日志与临时文件
+*.log
+logs/
+*.swp
+*.swo
+*~
+*.tmp
+hs_err_pid*
+replay_pid*
+
+# 系统文件
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# 敏感配置（按需开启，不要提交密码和密钥）
+.env
+application-local.yml
+application-local.properties

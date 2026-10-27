@@ -10,22 +10,23 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/campus_lost_found?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: zjmgzh2@
+    password: ${DB_PASSWORD}
   servlet:
     multipart:
       max-file-size: 5MB
       max-request-size: 10MB
   ai:
-#    deepseek:
-#      api-key: ${DEEPSEEK_API_KEY:sk-xxx}
-#      base-url: https://api.deepseek.com
-#      chat:
-#        options:
-#          model: deepseek-chat
+    openai:
+      api-key: ${DEEPSEEK_API_KEY}
+      base-url: https://api.deepseek.com
+      chat:
+        options:
+          model: deepseek-chat
+        #  超时
+          timeout: 6000
     ollama:
       base-url: http://localhost:11434
       chat:
-        enabled: true
         options:
           model: qwen3.5:9b-q4_K_M # 对话模型
       embedding:
