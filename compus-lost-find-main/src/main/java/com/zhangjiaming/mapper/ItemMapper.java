@@ -1,9 +1,11 @@
 package com.zhangjiaming.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.zhangjiaming.annotation.Autofill;
 import com.zhangjiaming.annotation.Autofill.OperationType;
 import com.zhangjiaming.entity.Item;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 物品 Mapper：继承 BaseMapper 获得通用 CRUD 能力
@@ -22,5 +24,5 @@ public interface ItemMapper extends BaseMapper<Item> {
      */
     @Override
     @Autofill(OperationType.UPDATE)
-    int updateById(Item entity);
+     int updateById(@Param(Constants.ENTITY) Item entity);
 }

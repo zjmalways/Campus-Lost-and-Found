@@ -6,6 +6,7 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 
+import com.zhangjiaming.context.SystemContext;
 import com.zhangjiaming.entity.ChatMessage;
 import com.zhangjiaming.mapper.ItemMapper;
 import com.zhangjiaming.service.AnnouncementService;
@@ -64,6 +65,7 @@ public class ChatServiceImpl implements ChatService {
                 userId, sessionId, history.size());
 
         return chatClient.prompt()
+                .system(SystemContext.SystemPrompt)
                 .messages(messages)
                 .tools(new ChatFunctionTools(itemService, itemMapper, announcementService,
                         userId, username, userRole))

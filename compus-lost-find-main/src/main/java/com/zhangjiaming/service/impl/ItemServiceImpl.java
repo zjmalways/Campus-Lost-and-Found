@@ -8,11 +8,15 @@ import com.zhangjiaming.dto.ItemPageRequest;
 import com.zhangjiaming.entity.Item;
 import com.zhangjiaming.mapper.ItemMapper;
 import com.zhangjiaming.service.ItemService;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+@Slf4j 
 @Service
 public class ItemServiceImpl implements ItemService {
 
@@ -162,13 +166,15 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public boolean updateStatus(Long itemId, Integer status, Long userId, Integer userRole) {
         Item item = itemMapper.selectById(itemId);
+        log.info("{}",item);
         if (item == null) {
             throw new RuntimeException(ErrorContext.ITEM_NOT_EXISTS);
         }
         if (!item.getPublisherId().equals(userId) && (userRole == null || userRole != 1)) {
             throw new RuntimeException(ErrorContext.NO_PERMISSION_STATUS);
         }
-
+        
+        log.info("更新物品状态：itemId={}, status={}, userId={}, userRole={}", itemId, status, userId, userRole);
         Item update = new Item();
         update.setItemId(itemId);
         update.setStatus(status);

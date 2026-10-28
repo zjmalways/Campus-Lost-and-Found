@@ -40,6 +40,7 @@ public class GlobalExceptionHandler {
     /** 业务异常（Service 层抛出的 RuntimeException，携带友好提示） */
     @ExceptionHandler(RuntimeException.class)
     public Result<?> handleRuntimeException(RuntimeException e) {
+        log.error("业务异常: {}", e.getMessage());
         return Result.error(e.getMessage());
     }
 
@@ -47,6 +48,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<?> handleException(Exception e) {
         log.error("服务器内部错误", e);
+        log.error("服务器内部错误: {}", e.getMessage());
         return Result.error(ErrorContext.SERVER_ERROR);
     }
 }
